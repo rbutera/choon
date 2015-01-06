@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 'use strict';
 
 var youtubeUrl = process.argv[2];
@@ -6,6 +8,7 @@ var fs = require('fs');
 var path = require('path');
 var request = require('request');
 var progress = require('request-progress');
+var chalk = require('chalk');
 
 
 var youtubeId;

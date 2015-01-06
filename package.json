@@ -1,14 +1,25 @@
 {
-  "name": "liberate",
+  "name": "choon",
   "version": "0.1.0",
-  "description": "Uses Offliberty to download a YouTube video as MP3",
-  "main": "app.js",
+  "description": "Found a tune (choon) on YouTube? Download mp3s directly from the command line. Defaults to ~/Downloads, but destination directory may be specified.",
+  "main": "liberate.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Rai Butera",
   "license": "MIT",
   "dependencies": {
-    "offliberty": "0.0.4"
+    "chalk": "^0.5.1",
+    "offliberty": "0.0.4",
+    "request": "2.51.x",
+    "request-progress": "0.3.x"
+  },
+  "preferGlobal": "true",
+  "bin": {
+    "choon": "choon.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raibutera/choon.git"
   }
 }
