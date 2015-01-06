@@ -4,10 +4,12 @@
 
 var youtubeUrl = process.argv[2];
 var offliberty = require('offliberty');
+var chalk = require('chalk');
 var fs = require('fs');
 var path = require('path');
 var request = require('request');
 var progress = require('request-progress');
+
 
 
 var youtubeId;
@@ -26,10 +28,10 @@ var extractYoutubeId = function (url) {
 };
 
 if (!youtubeUrl) {
-  throw new Error('usage: liberate <url> <destination directory>');
+  throw new Error('usage: choon <url> <destination directory>');
 } else {
   // validate url as youtube
-  console.log('liberate: using offliberty to extract audio from ' + youtubeUrl + '.');
+  console.log(chalk.bold('choon: ') + 'using offliberty to extract audio from ' + youtubeUrl + '.');
 
   // extract uuid from youtube url
   youtubeId = extractYoutubeId(youtubeUrl);
@@ -46,7 +48,7 @@ var download = function (url, dest) {
         delay: 1000      // Only start to emit after 1000ms delay, defaults to 0ms
     })
     .on('progress', function (state) {
-        console.log(state.percent + '%');
+        console.log(chalk.bold(state.percent) + '% complete');
     })
     .on('error', function (err) {
         throw err;
@@ -59,14 +61,14 @@ var download = function (url, dest) {
        if(err){
          throw err;
        }
-       console.log('Finished!');
+       console.log(chalk.green.bgBlack('Finished!'));
        process.exit();
     });
   }
 };
 
 if (youtubeId) {
-  console.log('Requesting download url from offliberty');
+  console.log(chalk.dim('Requesting download url from offliberty'));
 
   offliberty.off(youtubeUrl, function (err, downloadUrl) {
     if (err) {
@@ -81,7 +83,7 @@ if (youtubeId) {
       }
 
       var finalDestination = downloadDirectory + '/' + youtubeId + '.mp3'; // no items, fox only, final destination
-      console.log('File will be downloaded to ' + finalDestination);
+      console.log(chalk.dim('File will be downloaded to ' + finalDestination));
       download(downloadUrl, finalDestination);
 
     }
