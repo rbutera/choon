@@ -7,5 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Rai Butera",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "offliberty": "0.0.4"
+  }
 }
