@@ -3,8 +3,6 @@
 // invariables
 var YOUTUBE_URL = process.argv[2];
 var HOME_DIRECTORY = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-var userDownloads = path.join(HOME_DIRECTORY, 'Downloads');
-var downloadDirectory = process.argv[3] || userDownloads;
 
 // libraries
 var offliberty = require('offliberty');
@@ -19,6 +17,9 @@ var videoDetails = require('./video-details.js');
 
 
 var youtubeId;
+
+var userDownloads = path.join(HOME_DIRECTORY, 'Downloads');
+var downloadDirectory = process.argv[3] || userDownloads;
 
 var extractYoutubeId = function (url) {
   var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
