@@ -1,6 +1,6 @@
 {
   "name": "choon",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Found a tune (choon) on YouTube? Download mp3s directly from the command line. Defaults to ~/Downloads, but destination directory may be specified.",
   "main": "liberate.js",
   "scripts": {
@@ -11,8 +11,10 @@
   "dependencies": {
     "chalk": "^0.5.1",
     "offliberty": "0.0.4",
+    "q": "^1.1.2",
     "request": "2.51.x",
-    "request-progress": "0.3.x"
+    "request-progress": "0.3.x",
+    "youtube-node": "1.1.2"
   },
   "preferGlobal": "true",
   "bin": {

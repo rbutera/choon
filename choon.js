@@ -9,7 +9,8 @@ var fs = require('fs');
 var path = require('path');
 var request = require('request');
 var progress = require('request-progress');
-
+var videoDetails = require('./video-details.js');
+var $q = require('q');
 
 
 var youtubeId;
@@ -27,6 +28,24 @@ var extractYoutubeId = function (url) {
   }
 };
 
+var buildMetaData = function(id){
+  var deferred = $q.defer();
+
+  if (!id) {
+    deferred.reject('no id sent to buildMetaData');
+  } else {
+    // get youtube details
+    videoDetails.get(id).then(function (details) {
+      console.log('video details from youtube: ', details);
+      deferred.resolve(details);
+    }, function(error){
+      deferred.reject(error);
+    });
+  }
+
+  return deferred.promise;
+};
+
 if (!youtubeUrl) {
   throw new Error('usage: choon <url> <destination directory>');
 } else {
@@ -38,8 +57,9 @@ if (!youtubeUrl) {
 }
 
 var download = function (url, dest) {
+  var deferred = $q.defer();
   if (!url || !dest) {
-    throw new Error('Download: missing argument(s)');
+    deferred.reject('Download: missing argument(s)');
   } else {
     console.log('Downloading ' + chalk.underline(url) + ' as ' + chalk.bold(dest));
     // Note that the options argument is optional
@@ -51,41 +71,58 @@ var download = function (url, dest) {
         console.log(chalk.bold(state.percent) + '% ' + chalk.dim('complete'));
     })
     .on('error', function (err) {
-        throw err;
+        deferred.reject(err);
     })
     .pipe(fs.createWriteStream(dest))
     .on('error', function (err) {
-        throw err;
+        deferred.reject(err);
     })
     .on('close', function (err) {
        if(err){
-         throw err;
+         deferred.reject(err);
        }
        console.log(chalk.green.bgBlack('Finished! Enjoy your choon!'));
-       process.exit();
+       deferred.resolve();
     });
   }
+  return deferred.promise;
 };
 
-if (youtubeId) {
+
+var olRequest = function(filename){
+  var deferred = $q.defer();
   console.log(chalk.dim('Requesting download url from offliberty'));
 
   offliberty.off(youtubeUrl, function (err, downloadUrl) {
     if (err) {
-      throw err;
+      deferred.reject(err);
     }
 
     if (!downloadUrl) {
-      throw new Error('ERROR: Could not generate download Url');
+      deferred.reject('ERROR: Could not generate download Url');
     } else {
       if(!process.argv[3]){
         console.log(chalk.dim('No destination directory specified.... defaulting to ~/Downloads/'));
       }
 
-      var finalDestination = downloadDirectory + '/' + youtubeId + '.mp3'; // no items, fox only, final destination
+      var finalDestination = downloadDirectory + '/' + (filename || youtubeId) + '.mp3'; // no items, fox only, final destination
       console.log(chalk.dim('File will be downloaded to ' + chalk.underline(finalDestination)));
-      download(downloadUrl, finalDestination);
-
+      deferred.resolve([downloadUrl, finalDestination]);
     }
   });
+  return deferred.promise;
+};
+
+
+if (youtubeId) {
+  buildMetaData(youtubeId).then(function(videoData){
+    return olRequest(videoData.title);
+  }).then(function(urlAndFilename){
+    return download(urlAndFilename[0], urlAndFilename[1]);
+  }).then(function(result){
+    process.exit();
+  }).catch(function(error){
+    throw error;
+  });
+
 }
