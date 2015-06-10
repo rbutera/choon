@@ -1,6 +1,6 @@
 {
   "name": "choon",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Found a tune (choon) on YouTube? Download mp3s directly from the command line. Defaults to ~/Downloads, but destination directory may be specified.",
   "main": "liberate.js",
   "scripts": {
