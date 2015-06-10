@@ -38,7 +38,7 @@ var buildMetaData = function(id){
   } else {
     // get youtube details
     videoDetails.get(id).then(function (details) {
-      console.log('video details from youtube: ', details);
+      // console.log('video details from youtube: ', details);
       deferred.resolve(details);
     }, function(error){
       deferred.reject(error);
