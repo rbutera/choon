@@ -1,22 +1,24 @@
 #! /usr/bin/env node
-
 'use strict';
+// invariables
+var YOUTUBE_URL = process.argv[2];
+var HOME_DIRECTORY = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+var userDownloads = path.join(HOME_DIRECTORY, 'Downloads');
+var downloadDirectory = process.argv[3] || userDownloads;
 
-var youtubeUrl = process.argv[2];
+// libraries
 var offliberty = require('offliberty');
 var chalk = require('chalk');
 var fs = require('fs');
 var path = require('path');
 var request = require('request');
 var progress = require('request-progress');
-var videoDetails = require('./video-details.js');
 var $q = require('q');
+
+var videoDetails = require('./video-details.js');
 
 
 var youtubeId;
-var HOME_DIRECTORY = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-var userDownloads = path.join(HOME_DIRECTORY, 'Downloads');
-var downloadDirectory = process.argv[3] || userDownloads;
 
 var extractYoutubeId = function (url) {
   var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -46,14 +48,14 @@ var buildMetaData = function(id){
   return deferred.promise;
 };
 
-if (!youtubeUrl) {
+if (!YOUTUBE_URL) {
   throw new Error('usage: choon <url> <destination directory>');
 } else {
   // validate url as youtube
-  console.log(chalk.white.bgBlack.bold('choon: ') + 'using offliberty to extract audio from ' + chalk.underline(youtubeUrl));
+  console.log(chalk.white.bgBlack.bold('choon: ') + 'using offliberty to extract audio from ' + chalk.underline(YOUTUBE_URL));
 
   // extract uuid from youtube url
-  youtubeId = extractYoutubeId(youtubeUrl);
+  youtubeId = extractYoutubeId(YOUTUBE_URL);
 }
 
 var download = function (url, dest) {
@@ -81,7 +83,7 @@ var download = function (url, dest) {
        if(err){
          deferred.reject(err);
        }
-       console.log(chalk.green.bgBlack('Finished! Enjoy your choon!'));
+       console.log(chalk.green.bgBlack('Enjoy your choon!'));
        deferred.resolve();
     });
   }
@@ -93,13 +95,13 @@ var olRequest = function(filename){
   var deferred = $q.defer();
   console.log(chalk.dim('Requesting download url from offliberty'));
 
-  offliberty.off(youtubeUrl, function (err, downloadUrl) {
+  offliberty.off(YOUTUBE_URL, function (err, downloadUrl) {
     if (err) {
       deferred.reject(err);
     }
 
     if (!downloadUrl) {
-      deferred.reject('ERROR: Could not generate download Url');
+      deferred.reject('ERROR: Could not generate download url');
     } else {
       if(!process.argv[3]){
         console.log(chalk.dim('No destination directory specified.... defaulting to ~/Downloads/'));
@@ -116,6 +118,7 @@ var olRequest = function(filename){
 
 if (youtubeId) {
   buildMetaData(youtubeId).then(function(videoData){
+    console.log(chalk.yellow.bgBlack('> ' + videoData.title));
     return olRequest(videoData.title);
   }).then(function(urlAndFilename){
     return download(urlAndFilename[0], urlAndFilename[1]);

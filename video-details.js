@@ -12,14 +12,13 @@ exports.get = function(id){
     deferred.reject('no id presented to video-details');
   } else {
     youTube.getById(id, function(result){
-      console.log('recieved result from YouTube');
       if (result && result.items && result.items[0].snippet) {
         deferred.resolve(result.items[0].snippet);
       } else {
         deferred.resolve(result);
       }
     }, function(error){
-      console.log('YouTube video details retrieval error');
+      console.error('YouTube video details retrieval error');
       deferred.reject(error);
     });
   }
