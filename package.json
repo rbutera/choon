@@ -1,6 +1,6 @@
 {
   "name": "choon",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Found a tune (choon) on YouTube? Download mp3s directly from the command line. Defaults to ~/Downloads, but destination directory may be specified.",
   "main": "liberate.js",
   "scripts": {
@@ -9,12 +9,14 @@
   "author": "Rai Butera",
   "license": "MIT",
   "dependencies": {
+    "lodash": "*",
     "chalk": "^0.5.1",
-    "offliberty": "0.0.4",
+    "offliberty": "1.x",
     "q": "^1.1.2",
     "request": "2.51.x",
     "request-progress": "0.3.x",
-    "youtube-node": "1.1.2"
+    "youtube-node": "1.1.2",
+    "cheerio": "0.19.x"
   },
   "preferGlobal": "true",
   "bin": {
