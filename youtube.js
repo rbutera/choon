@@ -1,11 +1,9 @@
 'use strict';
-
-var YouTube = require('youtube-node');
-var youTube = new YouTube();
+var chalk = require('chalk');
 var $q = require('q');
+var _ = require('lodash');
 
 youTube.setKey('AIzaSyCV-WHHsQcxAj0hbrG3PI8HONahDXTmw3Q');
-
 
 exports.video = function(id){
   // console.log('choonYT video: ', id);

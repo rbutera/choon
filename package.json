@@ -9,14 +9,14 @@
   "author": "Rai Butera",
   "license": "MIT",
   "dependencies": {
-    "lodash": "*",
     "chalk": "^0.5.1",
+    "cheerio": "0.19.x",
+    "lodash": "*",
     "offliberty": "1.x",
     "q": "^1.1.2",
     "request": "2.51.x",
     "request-progress": "0.3.x",
-    "youtube-node": "1.3.x",
-    "cheerio": "0.19.x"
+    "youtube-api": "^2.0.4"
   },
   "preferGlobal": "true",
   "bin": {
