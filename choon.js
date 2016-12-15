@@ -12,38 +12,70 @@ var path = require('path');
 var request = require('request');
 var progress = require('request-progress');
 var $q = require('q');
+var _ = require('lodash');
 
-var videoDetails = require('./video-details.js');
+var choonYT = require('./youtube.js');
 
 
-var youtubeId;
+var requestedContent;
 
 var userDownloads = path.join(HOME_DIRECTORY, 'Downloads');
 var downloadDirectory = process.argv[3] || userDownloads;
 
-var extractYoutubeId = function (url) {
+var processYoutubeUrl = function (url) {
+  var output = {
+    v: undefined,
+    list: undefined
+  };
+
   var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  var match = url.match(regExp);
-  if (match && match[2].length == 11) {
-    return match[2];
+  var extractVideoId = url.match(regExp);
+  if (extractVideoId && extractVideoId[2].length == 11) {
+    console.log('extracted video id');
+    output.v = extractVideoId[2];
   } else {
-    throw new Error('ERROR: Could not extract youtube id from download url');
+    console.error('ERROR: Could not extract youtube id from download url');
   }
+
+  var regExp = /^.*(youtu.be\/|list=)([^#\&\?]*).*/;
+  var extractPlaylistId = url.match(regExp);
+   if (extractPlaylistId && extractPlaylistId[2]){
+       console.log('extracted playlist id');
+       output.list = extractPlaylistId[2];
+   } else {
+     console.error('ERROR: Could not extract playlist id from download url');
+   }
+   return output;
 };
 
-var buildMetaData = function(id){
+var buildMetaData = function(input){
+  var id = input.v;
+  var list = input.list;
   var deferred = $q.defer();
-
-  if (!id) {
-    deferred.reject('no id sent to buildMetaData');
+  if (_.isString(input)) {
+    deferred.reject('Deprecated: buildMetaData now expects an object {v: \'video-id\', list: \'list-id\'}. Received ' + JSON.stringify(input));
+  }
+  if (_.isEmpty(id) && _.isEmpty(list)) {
+    deferred.reject('no id or list sent to buildMetaData');
   } else {
     // get youtube details
-    videoDetails.get(id).then(function (details) {
-      // console.log('video details from youtube: ', details);
-      deferred.resolve(details);
-    }, function(error){
-      deferred.reject(error);
-    });
+    if (!_.isEmpty(id)) {
+      chalk.dim('building meta data for video ' + id);
+      choonYT.video(id).then(function succ(res) {
+        deferred.resolve(res);
+      },function failure(error) {
+        deferred.reject(error);
+      });
+    } else if (!_.isEmpty(list)) {
+      chalk.dim('building meta data for playlist ' + id);
+      choonYT.list(list).then(function succ(res) {
+        deferred.resolve(res);
+      },function failure(error) {
+        deferred.reject(error);
+      });
+    } else {
+      deferred.reject('id and list are empty, wtf is:', wtf);
+    }
   }
 
   return deferred.promise;
@@ -56,7 +88,7 @@ if (!YOUTUBE_URL) {
   console.log(chalk.white.bgBlack.bold('choon: ') + 'using offliberty to extract audio from ' + chalk.underline(YOUTUBE_URL));
 
   // extract uuid from youtube url
-  youtubeId = extractYoutubeId(YOUTUBE_URL);
+  requestedContent = processYoutubeUrl(YOUTUBE_URL);
 }
 
 var download = function (url, dest) {
@@ -108,7 +140,7 @@ var olRequest = function(filename){
         console.log(chalk.dim('No destination directory specified.... defaulting to ~/Downloads/'));
       }
 
-      var finalDestination = downloadDirectory + '/' + (filename || youtubeId) + '.mp3'; // no items, fox only, final destination
+      var finalDestination = downloadDirectory + '/' + (filename || requestedContent) + '.mp3'; // no items, fox only, final destination
       console.log(chalk.dim('File will be downloaded to ' + chalk.underline(finalDestination)));
       deferred.resolve([downloadUrl, finalDestination]);
     }
@@ -116,17 +148,41 @@ var olRequest = function(filename){
   return deferred.promise;
 };
 
+var getSong = function (videoData) {
+  console.log(chalk.yellow.bgBlack('> ' + videoData.title));
+  return olRequest(videoData.title)
+    .then(function(urlAndFilename){
+      return download(urlAndFilename[0], urlAndFilename[1]);
+    }).then(function(result){
+      return 'success';
+    }).catch(function(error){
+      throw error;
+    });
+}
 
-if (youtubeId) {
-  buildMetaData(youtubeId).then(function(videoData){
-    console.log(chalk.yellow.bgBlack('> ' + videoData.title));
-    return olRequest(videoData.title);
-  }).then(function(urlAndFilename){
-    return download(urlAndFilename[0], urlAndFilename[1]);
-  }).then(function(result){
-    process.exit();
-  }).catch(function(error){
-    throw error;
-  });
-
+if (!_.isEmpty(requestedContent) && (!_.isEmpty(requestedContent.v) || !_.isEmpty(requestedContent.list))) {
+  console.log('####',requestedContent);
+  buildMetaData(requestedContent).then(function (metadata){
+    if (_.isEmpty(requestedContent.list)){ /* get video mode */
+      chalk.inverse('single video mode');
+      console.log(metadata);
+      return getSong(metadata[0]);
+    } else { /* get playlist mode */
+      chalk.inverse('playlist mode');
+      if (metadata.length > 1) {
+        var playlist = metadata[1];
+        chalk.magenta(playlist);
+      } else if (metadata.length === 1) {
+        var playlist = metadata[0];
+        chalk.magenta(playlist);
+      } else {
+        throw new error('playlist mode failure - metadata metadata array of unexpected size');
+      }
+    }
+  }, function(error){
+      throw error;
+  })
+} else {
+  console.log(requestedContent);
+  throw new error('requested content empty');
 }
