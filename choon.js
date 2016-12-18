@@ -6,11 +6,11 @@ var HOME_DIRECTORY = process.env.HOME || process.env.HOMEPATH || process.env.USE
 
 // libraries
 var offliberty = require('offliberty');
-var chalk = require('chalk');
 var fs = require('fs');
 var path = require('path');
 var request = require('request');
 var progress = require('request-progress');
+var chalk = require('chalk');
 var $q = require('q');
 var _ = require('lodash');
 
@@ -60,14 +60,14 @@ var buildMetaData = function(input){
   } else {
     // get youtube details
     if (!_.isEmpty(id)) {
-      chalk.dim('building meta data for video ' + id);
+      console.log('building meta data for video ' + id);
       choonYT.video(id).then(function succ(res) {
         deferred.resolve(res);
       },function failure(error) {
         deferred.reject(error);
       });
     } else if (!_.isEmpty(list)) {
-      chalk.dim('building meta data for playlist ' + id);
+      console.log('building meta data for playlist ' + id);
       choonYT.list(list).then(function succ(res) {
         deferred.resolve(res);
       },function failure(error) {

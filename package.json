@@ -16,7 +16,8 @@
     "q": "^1.1.2",
     "request": "2.51.x",
     "request-progress": "0.3.x",
-    "youtube-api": "^2.0.4"
+    "youtube-api": "^2.0.4",
+    "youtube-feeds": "^2.4.1"
   },
   "preferGlobal": "true",
   "bin": {
